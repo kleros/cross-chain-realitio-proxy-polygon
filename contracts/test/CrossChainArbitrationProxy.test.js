@@ -1,4 +1,5 @@
 const { ethers } = require("hardhat");
+//const { solidity, deployMockContract } = require("ethereum-waffle");
 const { solidity } = require("ethereum-waffle");
 const { use, expect } = require("chai");
 const getContractAddress = require("../deploy-helpers/getContractAddress");
@@ -20,9 +21,6 @@ let asker;
 let answerer;
 let requester;
 let other;
-
-const homeChainId = hexZeroPad(0, 32);
-const foreignChainId = hexZeroPad(0, 32);
 
 const arbitrationFee = BigNumber.from(BigInt(1e18));
 const arbitratorExtraData = "0x00";
@@ -343,14 +341,14 @@ describe("Cross-Chain Arbitration", () => {
     const Arbitrator = await ethers.getContractFactory("MockArbitrator", signer);
     const arbitrator = await Arbitrator.deploy(String(arbitrationFee));
 
-    const AMB = await ethers.getContractFactory("MockAMB", signer);
-    const amb = await AMB.deploy();
+    const FxRoot = await ethers.getContractFactory("MockFxRoot", signer);
+    const fxRoot = await FxRoot.deploy();
 
     const Realitio = await ethers.getContractFactory("MockRealitio", signer);
     const realitio = await Realitio.deploy();
 
-    const ForeignProxy = await ethers.getContractFactory("RealitioForeignArbitrationProxy", signer);
-    const HomeProxy = await ethers.getContractFactory("RealitioHomeArbitrationProxy", signer);
+    const ForeignProxy = await ethers.getContractFactory("MockForeignArbitrationProxy", signer);
+    const HomeProxy = await ethers.getContractFactory("MockHomeArbitrationProxy", signer);
 
     const address = await signer.getAddress();
     const nonce = await signer.getTransactionCount();
@@ -359,19 +357,22 @@ describe("Cross-Chain Arbitration", () => {
     const homeProxyAddress = getContractAddress(address, nonce + 1);
 
     const foreignProxy = await ForeignProxy.deploy(
-      amb.address,
+      ADDRESS_ZERO,
+      fxRoot.address,
       homeProxyAddress,
-      homeChainId,
       arbitrator.address,
       arbitratorExtraData,
       metaEvidence,
       termsOfService
     );
 
-    const homeProxy = await HomeProxy.deploy(amb.address, foreignProxyAddress, foreignChainId, realitio.address);
+    const homeProxy = await HomeProxy.deploy(
+      fxRoot.address, // Here our mock FxRoot directly calls the FxChildTunnel
+      foreignProxyAddress,
+      realitio.address
+    );
 
     return {
-      amb,
       arbitrator,
       realitio,
       foreignProxy,
