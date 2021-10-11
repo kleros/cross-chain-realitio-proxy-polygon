@@ -9,6 +9,7 @@ use(solidity);
 
 const { BigNumber } = ethers;
 const { hexZeroPad } = ethers.utils;
+const ADDRESS_ZERO = ethers.constants.AddressZero;
 
 const arbitratorExtraData = "0x85";
 const arbitrationCost = 1000;
@@ -28,8 +29,6 @@ const maxPrevious = 2001;
 
 const metaEvidence = "ipfs/X";
 const termsOfService = "ipfs/Y";
-const homeChainId = hexZeroPad(0, 32);
-const foreignChainId = hexZeroPad(0, 32);
 const oneETH = BigNumber.from(BigInt(1e18));
 const ZERO_HASH = hexZeroPad(0, 32);
 const ZERO_ADDRESS = hexZeroPad(0, 20);
@@ -37,7 +36,6 @@ const ZERO_ADDRESS = hexZeroPad(0, 20);
 let arbitrator;
 let homeProxy;
 let foreignProxy;
-let amb;
 let realitio;
 
 let governor;
@@ -50,7 +48,7 @@ let other;
 describe("Cross-chain arbitration with appeals", () => {
   beforeEach("initialize the contract", async function () {
     [governor, requester, crowdfunder1, crowdfunder2, answerer, other] = await ethers.getSigners();
-    ({ amb, arbitrator, realitio, foreignProxy, homeProxy } = await deployContracts(governor));
+    ({ arbitrator, realitio, foreignProxy, homeProxy } = await deployContracts(governor));
 
     // Create disputes so the index in tests will not be a default value.
     await arbitrator.connect(other).createDispute(42, arbitratorExtraData, { value: arbitrationCost });
@@ -62,11 +60,8 @@ describe("Cross-chain arbitration with appeals", () => {
   });
 
   it("Should correctly set the initial values", async () => {
-    expect(await foreignProxy.amb()).to.equal(amb.address);
     expect(await foreignProxy.arbitrator()).to.equal(arbitrator.address);
     expect(await foreignProxy.arbitratorExtraData()).to.equal(arbitratorExtraData);
-    expect(await foreignProxy.homeProxy()).to.equal(homeProxy.address);
-    expect(await foreignProxy.homeChainId()).to.equal(homeChainId);
     expect(await foreignProxy.termsOfService()).to.equal(termsOfService);
 
     // 0 - winner, 1 - loser, 2 - loserAppealPeriod.
@@ -106,7 +101,7 @@ describe("Cross-chain arbitration with appeals", () => {
 
     await expect(
       foreignProxy.connect(other).receiveArbitrationAcknowledgement(questionID, await requester.getAddress())
-    ).to.be.revertedWith("Only AMB allowed");
+    ).to.be.revertedWith("Can only be called via bridge");
 
     await expect(homeProxy.handleNotifiedRequest(questionID, await requester.getAddress()))
       .to.emit(arbitrator, "DisputeCreation")
@@ -162,7 +157,7 @@ describe("Cross-chain arbitration with appeals", () => {
     const oldBalance = await requester.getBalance();
     await expect(
       foreignProxy.connect(other).receiveArbitrationCancelation(questionID, await requester.getAddress())
-    ).to.be.revertedWith("Only AMB allowed");
+    ).to.be.revertedWith("Can only be called via bridge");
 
     await expect(homeProxy.handleRejectedRequest(questionID, await requester.getAddress()))
       .to.emit(foreignProxy, "ArbitrationCanceled")
@@ -693,14 +688,14 @@ describe("Cross-chain arbitration with appeals", () => {
     const Arbitrator = await ethers.getContractFactory("AutoAppealableArbitrator", signer);
     const arbitrator = await Arbitrator.deploy(String(arbitrationCost));
 
-    const AMB = await ethers.getContractFactory("MockAMB", signer);
-    const amb = await AMB.deploy();
+    const FxRoot = await ethers.getContractFactory("MockFxRoot", signer);
+    const fxRoot = await FxRoot.deploy();
 
     const Realitio = await ethers.getContractFactory("MockRealitio", signer);
     const realitio = await Realitio.deploy();
 
-    const ForeignProxy = await ethers.getContractFactory("RealitioForeignArbitrationProxyWithAppeals", signer);
-    const HomeProxy = await ethers.getContractFactory("RealitioHomeArbitrationProxy", signer);
+    const ForeignProxy = await ethers.getContractFactory("MockForeignArbitrationProxyWithAppeals", signer);
+    const HomeProxy = await ethers.getContractFactory("MockHomeArbitrationProxy", signer);
 
     const address = await signer.getAddress();
     const nonce = await signer.getTransactionCount();
@@ -709,9 +704,9 @@ describe("Cross-chain arbitration with appeals", () => {
     const homeProxyAddress = getContractAddress(address, nonce + 1);
 
     const foreignProxy = await ForeignProxy.deploy(
-      amb.address,
+      ADDRESS_ZERO,
+      fxRoot.address,
       homeProxyAddress,
-      homeChainId,
       arbitrator.address,
       arbitratorExtraData,
       metaEvidence,
@@ -721,10 +716,13 @@ describe("Cross-chain arbitration with appeals", () => {
       loserAppealPeriodMultiplier
     );
 
-    const homeProxy = await HomeProxy.deploy(amb.address, foreignProxyAddress, foreignChainId, realitio.address);
+    const homeProxy = await HomeProxy.deploy(
+      fxRoot.address, // Here our mock FxRoot directly calls the FxChildTunnel
+      foreignProxyAddress,
+      realitio.address
+    );
 
     return {
-      amb,
       arbitrator,
       realitio,
       foreignProxy,
