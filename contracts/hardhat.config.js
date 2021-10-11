@@ -31,42 +31,40 @@ module.exports = {
     sources: "./src",
   },
   networks: {
-    hardhat: {
-      live: false,
-      saveDeployments: false,
-      tags: ["test", "local"],
+    mumbai: {
+      chainId: 80001,
+      url: `https://rpc-mumbai.maticvigil.com/v1/${process.env.MATIC_API_KEY}`,
+      accounts: [process.env.PRIVATE_KEY],
+    },
+    polygon: {
+      chainId: 137,
+      url: `https://rpc-mainnet.maticvigil.com/v1/${process.env.MATIC_API_KEY}`,
+      accounts: [process.env.PRIVATE_KEY],
     },
     sokol: {
       chainId: 77,
       url: "https://sokol.poa.network/",
       accounts: [process.env.PRIVATE_KEY],
-      live: true,
-      saveDeployments: true,
-      tags: ["staging"],
     },
     xdai: {
       chainId: 100,
       url: "https://rpc.xdaichain.com/",
       accounts: [process.env.PRIVATE_KEY, process.env.MAINNET_PRIVATE_KEY],
-      live: true,
-      saveDeployments: true,
-      tags: ["production"],
+    },
+    goerli: {
+      chainId: 5,
+      url: `https://goerli.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      accounts: [process.env.PRIVATE_KEY],
     },
     kovan: {
       chainId: 42,
       url: `https://kovan.infura.io/v3/${process.env.INFURA_API_KEY}`,
       accounts: [process.env.PRIVATE_KEY],
-      live: true,
-      saveDeployments: true,
-      tags: ["staging"],
     },
     mainnet: {
       chainId: 1,
       url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
       accounts: [process.env.MAINNET_PRIVATE_KEY, process.env.PRIVATE_KEY],
-      live: true,
-      saveDeployments: true,
-      tags: ["production"],
     },
   },
   namedAccounts: {
