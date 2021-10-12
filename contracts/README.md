@@ -6,12 +6,12 @@ Smart contracts to enable cross-chain arbitration for Realitio (Reality.eth)
 
 ### Home Proxy
 
-- Sokol: [deployment](deployments/sokol/RealitioHomeArbitrationProxy.json#L2).
-- xDai: [deployment](deployments/xdai/RealitioHomeArbitrationProxy.json#L2).
+- Mumbai: [deployment](deployments/mumbai/RealitioHomeArbitrationProxy.json#L2).
+- Polygon: [deployment](deployments/polygon/RealitioHomeArbitrationProxy.json#L2).
 
 ### Foreign Proxy
 
-- Kovan: [deployment](deployments/kovan/RealitioForeignArbitrationProxy.json#L2).
+- goerli: [deployment](deployments/goerli/RealitioForeignArbitrationProxy.json#L2).
 - Mainnet: [deployment](deployments/mainnet/RealitioForeignArbitrationProxy.json#L2).
 
 ## Contributing
@@ -61,11 +61,13 @@ cp .env.example .env
 ```
 
 The following env vars are required:
+
 - `PRIVATE_KEY`: the private key of the deployer account used for xDAI, Sokol and Kovan.
 - `MAINNET_PRIVATE_KEY`: the private key of the deployer account used for Mainnet.
 - `INFURA_API_KEY`: the API key for infura.
 
 The ones below are optional:
+
 - `ETHERSCAN_API_KEY`: used only if you wish to verify the source of the newly deployed contracts on Etherscan.
 
 #### 1. Update the Constructor Parameters (optional)
@@ -75,8 +77,8 @@ If some of the constructor parameters (such as the Meta Evidence) needs to chang
 #### 2. Deploy the Proxies
 
 ```bash
-yarn deploy:staging # to deploy to Sokol/Kovan
-# yarn deploy:production # to deploy to xDAI/Mainnet
+yarn deploy:staging # to deploy to Mumbai/Goerli
+# yarn deploy:production # to deploy to Polygon/Mainnet
 ```
 
 The deployed addresses should be output to the screen after the deployment is complete.
@@ -89,7 +91,7 @@ This must be done for each network separately.
 For `Kovan` or `Mainnet` you can use the `etherscan-verify` command from `hardhat`:
 
 ```bash
-yarn hardhat --network <kovan|mainnet> etherscan-verify
+yarn hardhat --network <mumbai|polygon|goerli|mainnet> etherscan-verify
 ```
 
-For `Sokol` and `xDAI` the process currently must be done manually through [Blockscout](https://blockscout.com/).
+_Note_: For Polygon Mainnet and Mumbai testnet a separate ETHERSCAN_API_KEY is required created on https://polygonscan.com

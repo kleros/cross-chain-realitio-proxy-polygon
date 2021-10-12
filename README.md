@@ -1,6 +1,6 @@
 # Cross-Chain Realitio Proxy
 
-Enables cross-chain arbitration for Realition (Reality.eth) on xDAI or other AMB-compatible networks using Kleros as arbitrator.
+Enables cross-chain arbitration for Realition (Reality.eth) on Polygon using Kleros as arbitrator.
 
 ## High-Level Flow Description
 

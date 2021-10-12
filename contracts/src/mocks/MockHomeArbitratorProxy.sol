@@ -20,8 +20,8 @@ contract MockHomeArbitrationProxy is RealitioHomeArbitrationProxy {
         foreignProxy = MockForeignArbitrationProxy(_foreignProxy);
     }
 
-    // Helper method to test _processMessageFromChild directly without having to call internal
-    // _validateAndExtractMessage
+    // Overridden to directly call the foreignProxy under test
+    // instead of emitting an event
     function _sendMessageToRoot(bytes memory message) internal override {
         foreignProxy.processMessageFromChild(message);
     }
