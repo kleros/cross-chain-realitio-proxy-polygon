@@ -2,6 +2,14 @@
 
 Enables cross-chain arbitration for Realition (Reality.eth) on Polygon using Kleros as arbitrator.
 
+##
+
+We use Polygon Fx-Portal mechanism for cross chain communication.
+You can find out more about how Fx-Portal works from here:
+
+- https://docs.polygon.technology/docs/develop/l1-l2-communication/fx-portal/
+- https://github.com/fx-portal/contracts
+
 ## High-Level Flow Description
 
 1. Alice requests arbitration on the main chain paying the arbitration fee to the ETH proxy and indicates the maximum value of the bond for the question (A.K.A. `max_previous`).
