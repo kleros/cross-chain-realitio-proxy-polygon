@@ -78,7 +78,8 @@ interface IHomeArbitrationProxy {
 
     /**
      * @notice Handles arbitration request after it has been notified to Realitio for a given question.
-     * @dev This method exists because `receiveArbitrationRequest` is called by the AMB and cannot send messages back to it.
+     * @dev This method exists because `receiveArbitrationRequest` is called by
+     * the Polygon Bridge and cannot send messages back to it.
      * @param _questionID The ID of the question.
      * @param _requester The address of the arbitration requester.
      */
@@ -86,7 +87,8 @@ interface IHomeArbitrationProxy {
 
     /**
      * @notice Handles arbitration request after it has been rejected.
-     * @dev This method exists because `receiveArbitrationRequest` is called by the AMB and cannot send messages back to it.
+     * @dev This method exists because `receiveArbitrationRequest` is called by
+     * the Polygon Bridge and cannot send messages back to it.
      * Reasons why the request might be rejected:
      *  - The question does not exist
      *  - The question was not answered yet

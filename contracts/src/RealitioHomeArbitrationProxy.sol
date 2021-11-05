@@ -2,10 +2,10 @@
 
 /**
  *  @authors: [@hbarcelos, @shalzz]
- *  @reviewers: [@ferittuncer*, @fnanni-0*, @nix1g*, @epiqueras*, @clesaege*, @unknownunknown1*]
+ *  @reviewers: [@ferittuncer*, @fnanni-0*, @nix1g*, @epiqueras*, @clesaege*, @unknownunknown1]
  *  @auditors: []
  *  @bounties: []
- *  @deployments: [0xe40DD83a262da3f56976038F1554Fe541Fa75ecd]
+ *  @deployments: []
  */
 
 pragma solidity ^0.7.2;
@@ -16,7 +16,7 @@ import {IForeignArbitrationProxy, IHomeArbitrationProxy} from "./ArbitrationProx
 
 /**
  * @title Arbitration proxy for Realitio on the side-chain side (A.K.A. the Home Chain).
- * @dev This contract is meant to be deployed to side-chains (i.e.: xDAI) in which Reality.eth is deployed.
+ * @dev This contract is meant to be deployed to side-chains in which Reality.eth is deployed.
  */
 contract RealitioHomeArbitrationProxy is IHomeArbitrationProxy, FxBaseChildTunnel {
     /// @dev The address of the Realitio contract (v2.1+ required). TRUSTED.
@@ -45,6 +45,14 @@ contract RealitioHomeArbitrationProxy is IHomeArbitrationProxy, FxBaseChildTunne
     /// @dev Associates a question ID with the requester who succeeded in requesting arbitration. questionIDToRequester[questionID]
     mapping(bytes32 => address) public questionIDToRequester;
 
+    /**
+     * @dev This is applied to functions called via the internal function
+     * `_processMessageFromRoot` which is invoked via the Polygon bridge (see FxBaseChildTunnel)
+     *
+     * The functions requiring this modifier cannot simply be declared internal as
+     * we still need the ABI generated of these functions to be able to call them
+     * across contracts and have the compiler type check the function signatures.
+     */
     modifier onlyBridge() {
         require(msg.sender == address(this), "Can only be called via bridge");
         _;
@@ -104,7 +112,8 @@ contract RealitioHomeArbitrationProxy is IHomeArbitrationProxy, FxBaseChildTunne
 
     /**
      * @notice Handles arbitration request after it has been notified to Realitio for a given question.
-     * @dev This method exists because `receiveArbitrationRequest` is called by the AMB and cannot send messages back to it.
+     * @dev This method exists because `receiveArbitrationRequest` is called by the Polygon Bridge
+     * and cannot send messages back to it.
      * @param _questionID The ID of the question.
      * @param _requester The address of the user that requested arbitration.
      */
@@ -123,7 +132,8 @@ contract RealitioHomeArbitrationProxy is IHomeArbitrationProxy, FxBaseChildTunne
 
     /**
      * @notice Handles arbitration request after it has been rejected.
-     * @dev This method exists because `receiveArbitrationRequest` is called by the AMB and cannot send messages back to it.
+     * @dev This method exists because `receiveArbitrationRequest` is called by the Polygon Bridge
+     * and cannot send messages back to it.
      * Reasons why the request might be rejected:
      *  - The question does not exist
      *  - The question was not answered yet

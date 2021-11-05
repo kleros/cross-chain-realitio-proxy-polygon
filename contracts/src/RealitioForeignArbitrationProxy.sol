@@ -2,10 +2,10 @@
 
 /**
  *  @authors: [@hbarcelos, @shalzz]
- *  @reviewers: [@ferittuncer*, @fnanni-0*, @nix1g*, @epiqueras*, @clesaege*, @unknownunknown1*, @MerlinEgalite*]
+ *  @reviewers: [@ferittuncer*, @fnanni-0*, @nix1g*, @epiqueras*, @clesaege*, @unknownunknown1, @MerlinEgalite*]
  *  @auditors: []
  *  @bounties: []
- *  @deployments: [0x79d0464Ec27F67663DADf761432fC8DD0AeA3D49]
+ *  @deployments: []
  */
 
 pragma solidity ^0.7.2;
@@ -31,8 +31,8 @@ contract RealitioForeignArbitrationProxy is IForeignArbitrationProxy, FxBaseRoot
     /// @dev The ID of the MetaEvidence for disputes.
     uint256 public constant META_EVIDENCE_ID = 0;
 
-    /// @dev The number of choices for the arbitrator. Kleros is currently able to provide ruling values of up to 2^256 - 2.
-    uint256 public constant NUMBER_OF_CHOICES_FOR_ARBITRATOR = type(uint256).max - 1;
+    /// @dev The number of choices for the arbitrator.
+    uint256 public constant NUMBER_OF_CHOICES_FOR_ARBITRATOR = type(uint256).max;
 
     enum Status {
         None,
@@ -66,6 +66,14 @@ contract RealitioForeignArbitrationProxy is IForeignArbitrationProxy, FxBaseRoot
         _;
     }
 
+    /**
+     * @dev This is applied to functions called via the internal function
+     * `_processMessageFromChild` which is invoked via the Polygon bridge (see FxBaseRootTunnel)
+     *
+     * The functions requiring this modifier cannot simply be declared internal as
+     * we still need the ABI generated of these functions to be able to call them
+     * across contracts and have the compiler type check the function signatures.
+     */
     modifier onlyBridge() {
         require(msg.sender == address(this), "Can only be called via bridge");
         _;
@@ -223,6 +231,7 @@ contract RealitioForeignArbitrationProxy is IForeignArbitrationProxy, FxBaseRoot
         // The line below could be written more explicitly as:
         //     bytes32(_ruling == 0 ? uint256(-1) : _ruling - 1)
         // But the way it is written saves some gas.
+        // Note: This will no longer work with solidity 0.8.x and above compiler versions
         bytes32 answer = bytes32(_ruling - 1);
 
         bytes4 methodSelector = IHomeArbitrationProxy(0).receiveArbitrationAnswer.selector;

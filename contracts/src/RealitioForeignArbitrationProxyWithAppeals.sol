@@ -2,7 +2,7 @@
 
 /**
  *  @authors: [@hbarcelos, @unknownunknown1, @shalzz]
- *  @reviewers: [@MerlinEgalite*, @jaybuidl*]
+ *  @reviewers: [@MerlinEgalite*, @jaybuidl*, @unknownunknown1]
  *  @auditors: []
  *  @bounties: []
  *  @deployments: []
@@ -24,7 +24,8 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
     using CappedMath for uint256;
 
     /* Constants */
-    uint256 public constant NUMBER_OF_CHOICES_FOR_ARBITRATOR = type(uint256).max - 1; // The number of choices for the arbitrator. Kleros is currently able to provide ruling values of up to 2^256 - 2.
+    // The number of choices for the arbitrator.
+    uint256 public constant NUMBER_OF_CHOICES_FOR_ARBITRATOR = type(uint256).max;
     uint256 public constant MULTIPLIER_DIVISOR = 10000; // Divisor parameter for multipliers.
     uint256 public constant META_EVIDENCE_ID = 0; // The ID of the MetaEvidence for disputes.
 
@@ -70,11 +71,19 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
     uint256 public immutable loserMultiplier; // Multiplier for calculating the appeal fee that must be paid for the answer that the arbitrator didn't rule for in the previous round.
     uint256 public immutable loserAppealPeriodMultiplier; // Multiplier for calculating the duration of the appeal period for the loser, in basis points.
 
-    mapping(uint256 => mapping(address => ArbitrationRequest)) public arbitrationRequests; // Maps arbitration ID to its data. arbitrationRequests[uint(quertionID)][requester].
+    mapping(uint256 => mapping(address => ArbitrationRequest)) public arbitrationRequests; // Maps arbitration ID to its data. arbitrationRequests[uint(questionID)][requester].
     mapping(uint256 => DisputeDetails) public disputeIDToDisputeDetails; // Maps external dispute ids to local arbitration ID and requester who was able to complete the arbitration request.
     mapping(uint256 => bool) public arbitrationIDToDisputeExists; // Whether a dispute has already been created for the given arbitration ID or not.
     mapping(uint256 => address) public arbitrationIDToRequester; // Maps arbitration ID to the requester who was able to complete the arbitration request.
 
+    /**
+     * @dev This is applied to functions called via the internal function
+     * `_processMessageFromChild` which is invoked via the Polygon bridge (see FxBaseRootTunnel)
+     *
+     * The functions requiring this modifier cannot simply be declared internal as
+     * we still need the ABI generated of these functions to be able to call them
+     * across contracts and have the compiler type check the function signatures.
+     */
     modifier onlyBridge() {
         require(msg.sender == address(this), "Can only be called via bridge");
         _;
@@ -82,8 +91,8 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
 
     /**
      * @notice Creates an arbitration proxy on the foreign chain.
-     * @param _checkpointManager For Polygon FX-portal bridge
-     * @param _fxRoot Address of the FxRoot contract of the Polygon bridge
+     * @param _checkpointManager For Polygon FX-portal bridge.
+     * @param _fxRoot Address of the FxRoot contract of the Polygon bridge.
      * @param _homeProxy The address of the proxy.
      * @param _arbitrator Arbitrator contract address.
      * @param _arbitratorExtraData The extra data used to raise a dispute in the arbitrator.
@@ -243,7 +252,6 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
      * @return Whether the answer was fully funded or not.
      */
     function fundAppeal(uint256 _arbitrationID, uint256 _answer) external payable override returns (bool) {
-        require(_answer <= NUMBER_OF_CHOICES_FOR_ARBITRATOR, "Answer is out of bounds");
         ArbitrationRequest storage arbitration = arbitrationRequests[_arbitrationID][
             arbitrationIDToRequester[_arbitrationID]
         ];
@@ -397,7 +405,9 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
         arbitration.status = Status.Ruled;
 
         bytes4 methodSelector = IHomeArbitrationProxy(0).receiveArbitrationAnswer.selector;
+
         // Realitio ruling is shifted by 1 compared to Kleros.
+        // Note: This will no longer work with solidity 0.8.x and above compiler versions
         bytes memory data = abi.encodeWithSelector(methodSelector, bytes32(arbitrationID), bytes32(finalRuling - 1));
         _sendMessageToChild(data);
 
