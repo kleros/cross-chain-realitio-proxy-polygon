@@ -2,7 +2,6 @@ const { ethers } = require("hardhat");
 const { solidity } = require("ethereum-waffle");
 const { time } = require("@openzeppelin/test-helpers");
 const { use, expect } = require("chai");
-const { MAX_UINT256 } = require("@openzeppelin/test-helpers/src/constants");
 const getContractAddress = require("../deploy-helpers/getContractAddress");
 
 use(solidity);
@@ -24,7 +23,7 @@ const winnerMultiplier = 3000;
 const loserMultiplier = 7000;
 const loserAppealPeriodMultiplier = 5000;
 const gasPrice = 8000000;
-const MAX_ANSWER = "115792089237316195423570985008687907853269984665640564039457584007913129639934";
+const MAX_ANSWER = "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 const maxPrevious = 2001;
 
 const metaEvidence = "ipfs/X";
@@ -253,10 +252,6 @@ describe("Cross-chain arbitration with appeals", () => {
     );
 
     await arbitrator.giveAppealableRuling(2, 14, appealCost, appealTimeOut);
-
-    await expect(
-      foreignProxy.connect(crowdfunder1).fundAppeal(arbitrationID, MAX_UINT256.toString(), { value: 1000 })
-    ).to.be.revertedWith("Answer is out of bounds");
 
     // loserFee = appealCost + (appealCost * loserMultiplier / 10000) // 5000 + 5000 * 7/10 = 8500
     // 1st Funding ////////////////////////////////////
