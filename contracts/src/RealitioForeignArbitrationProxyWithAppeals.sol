@@ -2,7 +2,7 @@
 
 /**
  *  @authors: [@hbarcelos, @unknownunknown1, @shalzz]
- *  @reviewers: [@MerlinEgalite*, @jaybuidl*, @unknownunknown1]
+ *  @reviewers: [@MerlinEgalite*, @jaybuidl*, @unknownunknown1, @fnanni-0]
  *  @auditors: []
  *  @bounties: []
  *  @deployments: []
@@ -159,7 +159,7 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
      * @param _questionID The ID of the question.
      * @param _requester The requester.
      */
-    function receiveArbitrationAcknowledgement(bytes32 _questionID, address _requester) public override onlyBridge {
+    function receiveArbitrationAcknowledgement(bytes32 _questionID, address _requester) external override onlyBridge {
         uint256 arbitrationID = uint256(_questionID);
         ArbitrationRequest storage arbitration = arbitrationRequests[arbitrationID][_requester];
         require(arbitration.status == Status.Requested, "Invalid arbitration status");
@@ -206,7 +206,7 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
      * @param _questionID The ID of the question.
      * @param _requester The requester.
      */
-    function receiveArbitrationCancelation(bytes32 _questionID, address _requester) public override onlyBridge {
+    function receiveArbitrationCancelation(bytes32 _questionID, address _requester) external override onlyBridge {
         uint256 arbitrationID = uint256(_questionID);
         ArbitrationRequest storage arbitration = arbitrationRequests[arbitrationID][_requester];
         require(arbitration.status == Status.Requested, "Invalid arbitration status");

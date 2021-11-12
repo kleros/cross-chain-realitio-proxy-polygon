@@ -2,7 +2,7 @@
 
 /**
  *  @authors: [@hbarcelos, @shalzz]
- *  @reviewers: [@ferittuncer*, @fnanni-0*, @nix1g*, @epiqueras*, @clesaege*, @unknownunknown1]
+ *  @reviewers: [@ferittuncer*, @fnanni-0, @nix1g*, @epiqueras*, @clesaege*, @unknownunknown1]
  *  @auditors: []
  *  @bounties: []
  *  @deployments: []
@@ -82,7 +82,7 @@ contract RealitioHomeArbitrationProxy is IHomeArbitrationProxy, FxBaseChildTunne
         bytes32 _questionID,
         address _requester,
         uint256 _maxPrevious
-    ) public override onlyBridge {
+    ) external override onlyBridge {
         Request storage request = requests[_questionID][_requester];
         require(request.status == Status.None, "Request already exists");
 
@@ -162,7 +162,7 @@ contract RealitioHomeArbitrationProxy is IHomeArbitrationProxy, FxBaseChildTunne
      * @param _questionID The ID of the question.
      * @param _requester The address of the user that requested arbitration.
      */
-    function receiveArbitrationFailure(bytes32 _questionID, address _requester) public override onlyBridge {
+    function receiveArbitrationFailure(bytes32 _questionID, address _requester) external override onlyBridge {
         Request storage request = requests[_questionID][_requester];
         require(request.status == Status.AwaitingRuling, "Invalid request status");
 
@@ -179,7 +179,7 @@ contract RealitioHomeArbitrationProxy is IHomeArbitrationProxy, FxBaseChildTunne
      * @param _questionID The ID of the question.
      * @param _answer The answer from the arbitrator.
      */
-    function receiveArbitrationAnswer(bytes32 _questionID, bytes32 _answer) public override onlyBridge {
+    function receiveArbitrationAnswer(bytes32 _questionID, bytes32 _answer) external override onlyBridge {
         address requester = questionIDToRequester[_questionID];
         Request storage request = requests[_questionID][requester];
         require(request.status == Status.AwaitingRuling, "Invalid request status");
