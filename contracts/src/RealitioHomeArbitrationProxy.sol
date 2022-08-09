@@ -8,7 +8,7 @@
  *  @deployments: []
  */
 
-pragma solidity ^0.7.2;
+pragma solidity ^0.8.0;
 
 import {FxBaseChildTunnel} from "./dependencies/FxBaseChildTunnel.sol";
 import {RealitioInterface} from "./dependencies/RealitioInterface.sol";
@@ -61,14 +61,9 @@ contract RealitioHomeArbitrationProxy is IHomeArbitrationProxy, FxBaseChildTunne
     /**
      * @notice Creates an arbitration proxy on the home chain.
      * @param _fxChild Address of the FxChild contract of the Polygon bridge
-     * @param _foreignProxy The address of the proxy.
      * @param _realitio Realitio contract address.
      */
-    constructor(
-        address _fxChild,
-        address _foreignProxy,
-        RealitioInterface _realitio
-    ) FxBaseChildTunnel(_fxChild, _foreignProxy) {
+    constructor(address _fxChild, RealitioInterface _realitio) FxBaseChildTunnel(_fxChild) {
         realitio = _realitio;
     }
 
@@ -123,7 +118,7 @@ contract RealitioHomeArbitrationProxy is IHomeArbitrationProxy, FxBaseChildTunne
 
         request.status = Status.AwaitingRuling;
 
-        bytes4 selector = IForeignArbitrationProxy(0).receiveArbitrationAcknowledgement.selector;
+        bytes4 selector = IForeignArbitrationProxy.receiveArbitrationAcknowledgement.selector;
         bytes memory data = abi.encodeWithSelector(selector, _questionID, _requester);
         _sendMessageToRoot(data);
 
@@ -149,7 +144,7 @@ contract RealitioHomeArbitrationProxy is IHomeArbitrationProxy, FxBaseChildTunne
         // At this point, only the request.status is set, simply reseting the status to Status.None is enough.
         request.status = Status.None;
 
-        bytes4 selector = IForeignArbitrationProxy(0).receiveArbitrationCancelation.selector;
+        bytes4 selector = IForeignArbitrationProxy.receiveArbitrationCancelation.selector;
         bytes memory data = abi.encodeWithSelector(selector, _questionID, _requester);
         _sendMessageToRoot(data);
 

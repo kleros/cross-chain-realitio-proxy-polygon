@@ -1,4 +1,4 @@
-pragma solidity ^0.7.2;
+pragma solidity ^0.8.0;
 
 import {IArbitrator} from "@kleros/erc-792/contracts/IArbitrator.sol";
 import {RealitioForeignArbitrationProxyWithAppeals} from "../RealitioForeignArbitrationProxyWithAppeals.sol";
@@ -11,7 +11,6 @@ contract MockForeignArbitrationProxyWithAppeals is RealitioForeignArbitrationPro
     constructor(
         address _checkpointManager,
         address _fxRoot,
-        address _homeProxy,
         IArbitrator _arbitrator,
         bytes memory _arbitratorExtraData,
         string memory _metaEvidence,
@@ -23,7 +22,6 @@ contract MockForeignArbitrationProxyWithAppeals is RealitioForeignArbitrationPro
         RealitioForeignArbitrationProxyWithAppeals(
             _checkpointManager,
             _fxRoot,
-            _homeProxy,
             _arbitrator,
             _arbitratorExtraData,
             _metaEvidence,

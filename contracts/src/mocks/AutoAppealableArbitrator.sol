@@ -12,7 +12,7 @@ pragma solidity >=0.7;
 
 import "@kleros/erc-792/contracts/IArbitrable.sol";
 import "@kleros/erc-792/contracts/IArbitrator.sol";
-import "@kleros/ethereum-libraries/contracts/CappedMath.sol";
+import "../dependencies/lib/CappedMath.sol";
 
 /** @title Auto Appealable Arbitrator
  *  @dev This is a centralized arbitrator which either gives direct rulings or provides a time and fee for appeal.
@@ -115,7 +115,7 @@ contract AutoAppealableArbitrator is IArbitrator {
         dispute.ruling = _ruling;
         dispute.status = DisputeStatus.Solved;
 
-        msg.sender.send(dispute.fees); // Avoid blocking.
+        payable(msg.sender).send(dispute.fees); // Avoid blocking.
         dispute.arbitrated.rule(_disputeID, _ruling);
     }
 
@@ -188,7 +188,7 @@ contract AutoAppealableArbitrator is IArbitrator {
         );
 
         dispute.status = DisputeStatus.Solved;
-        msg.sender.send(dispute.fees); // Avoid blocking.
+        payable(msg.sender).send(dispute.fees); // Avoid blocking.
         dispute.arbitrated.rule(_disputeID, dispute.ruling);
     }
 
