@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import Web3 from "web3";
 
-import RealitioForeignArbitrationProxy from "../../../contracts/artifacts/src/RealitioForeignArbitrationProxyWithAppeals.sol/RealitioForeignArbitrationProxyWithAppeals.json";
-import RealitioHomeArbitrationProxy from "../../../contracts/artifacts/src/RealitioHomeArbitrationProxy.sol/RealitioHomeArbitrationProxy.json";
-import RealitioInterface from "../../../contracts/artifacts/src/dependencies/RealitioInterface.sol/RealitioInterface.json";
+import RealitioForeignArbitrationProxy from "@kleros/cross-chain-realitio-contracts/artifacts/src/RealitioForeignArbitrationProxyWithAppeals.sol/RealitioForeignArbitrationProxyWithAppeals.json";
+import RealitioHomeArbitrationProxy from "@kleros/cross-chain-realitio-contracts/artifacts/src/RealitioHomeArbitrationProxy.sol/RealitioHomeArbitrationProxy.json";
+import RealitioInterface from "@kleros/cross-chain-realitio-contracts/artifacts/src/dependencies/RealitioInterface.sol/RealitioInterface.json";
 
-import RealityLogo from "../assets/images/realitio_logo.png";
+import RealityLogo from "../assets/images/reality_eth_logo.png";
 import { populatedJSONForTemplate } from "@reality.eth/reality-eth-lib/formatters/question";
 class RealitioDisplayInterface extends Component {
   state = { question: null };
