@@ -1,7 +1,7 @@
 const Web3 = require("web3");
-const RealitioForeignArbitrationProxy = require("../../contracts/artifacts/src/RealitioForeignArbitrationProxyWithAppeals.sol/RealitioForeignArbitrationProxyWithAppeals.json");
-const RealitioHomeArbitrationProxy = require("../../contracts/artifacts/src/RealitioHomeArbitrationProxy.sol/RealitioHomeArbitrationProxy.json");
-const RealitioInterface = require("../../contracts/artifacts/src/dependencies/RealitioInterface.sol/RealitioInterface.json");
+const RealitioForeignArbitrationProxy = require("@kleros/cross-chain-realitio-contracts/artifacts/src/RealitioForeignArbitrationProxyWithAppeals.sol/RealitioForeignArbitrationProxyWithAppeals.json");
+const RealitioHomeArbitrationProxy = require("@kleros/cross-chain-realitio-contracts/artifacts/src/RealitioHomeArbitrationProxy.sol/RealitioHomeArbitrationProxy.json");
+const RealitioInterface = require("@kleros/cross-chain-realitio-contracts/artifacts/src/dependencies/RealitioInterface.sol/RealitioInterface.json");
 const RealitioQuestion = require("@realitio/realitio-lib/formatters/question.js");
 
 const fromBlock = 0;
