@@ -1,4 +1,4 @@
-pragma solidity ^0.7.2;
+pragma solidity ^0.8.0;
 
 import {RealitioInterface} from "../dependencies/RealitioInterface.sol";
 import {RealitioHomeArbitrationProxy} from "../RealitioHomeArbitrationProxy.sol";
@@ -16,7 +16,7 @@ contract MockHomeArbitrationProxy is RealitioHomeArbitrationProxy {
         address _fxChild,
         address _foreignProxy,
         RealitioInterface _realitio
-    ) RealitioHomeArbitrationProxy(_fxChild, _foreignProxy, _realitio) {
+    ) RealitioHomeArbitrationProxy(_fxChild, _realitio) {
         foreignProxy = MockForeignArbitrationProxyWithAppeals(_foreignProxy);
     }
 

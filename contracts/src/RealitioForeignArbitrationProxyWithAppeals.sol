@@ -8,10 +8,10 @@
  *  @deployments: []
  */
 
-pragma solidity ^0.7.2;
+pragma solidity ^0.8.0;
 
-import {IDisputeResolver, IArbitrator} from "@kleros/dispute-resolver-interface-contract/contracts/solc-0.7.x/IDisputeResolver.sol";
-import {CappedMath} from "@kleros/ethereum-libraries/contracts/CappedMath.sol";
+import {IDisputeResolver, IArbitrator} from "@kleros/dispute-resolver-interface-contract/contracts/IDisputeResolver.sol";
+import {CappedMath} from "./dependencies/lib/CappedMath.sol";
 import {FxBaseRootTunnel} from "./dependencies/FxBaseRootTunnel.sol";
 import {IForeignArbitrationProxy, IHomeArbitrationProxy} from "./ArbitrationProxyInterfaces.sol";
 
@@ -26,6 +26,7 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
     /* Constants */
     // The number of choices for the arbitrator.
     uint256 public constant NUMBER_OF_CHOICES_FOR_ARBITRATOR = type(uint256).max;
+    uint256 public constant REFUSE_TO_ARBITRATE_REALITIO = type(uint256).max; // Constant that represents "Refuse to rule" in realitio format.
     uint256 public constant MULTIPLIER_DIVISOR = 10000; // Divisor parameter for multipliers.
     uint256 public constant META_EVIDENCE_ID = 0; // The ID of the MetaEvidence for disputes.
 
@@ -93,7 +94,6 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
      * @notice Creates an arbitration proxy on the foreign chain.
      * @param _checkpointManager For Polygon FX-portal bridge.
      * @param _fxRoot Address of the FxRoot contract of the Polygon bridge.
-     * @param _homeProxy The address of the proxy.
      * @param _arbitrator Arbitrator contract address.
      * @param _arbitratorExtraData The extra data used to raise a dispute in the arbitrator.
      * @param _metaEvidence The URI of the meta evidence file.
@@ -105,7 +105,6 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
     constructor(
         address _checkpointManager,
         address _fxRoot,
-        address _homeProxy,
         IArbitrator _arbitrator,
         bytes memory _arbitratorExtraData,
         string memory _metaEvidence,
@@ -113,7 +112,7 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
         uint256 _winnerMultiplier,
         uint256 _loserMultiplier,
         uint256 _loserAppealPeriodMultiplier
-    ) FxBaseRootTunnel(_checkpointManager, _fxRoot, _homeProxy) {
+    ) FxBaseRootTunnel(_checkpointManager, _fxRoot) {
         arbitrator = _arbitrator;
         arbitratorExtraData = _arbitratorExtraData;
         termsOfService = _termsOfService;
@@ -147,7 +146,7 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
         arbitration.status = Status.Requested;
         arbitration.deposit = uint248(msg.value);
 
-        bytes4 methodSelector = IHomeArbitrationProxy(0).receiveArbitrationRequest.selector;
+        bytes4 methodSelector = IHomeArbitrationProxy.receiveArbitrationRequest.selector;
         bytes memory data = abi.encodeWithSelector(methodSelector, _questionID, msg.sender, _maxPrevious);
         _sendMessageToChild(data);
 
@@ -232,7 +231,7 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
         delete arbitrationRequests[arbitrationID][_requester];
         payable(_requester).send(deposit);
 
-        bytes4 methodSelector = IHomeArbitrationProxy(0).receiveArbitrationFailure.selector;
+        bytes4 methodSelector = IHomeArbitrationProxy.receiveArbitrationFailure.selector;
         bytes memory data = abi.encodeWithSelector(methodSelector, _questionID, _requester);
         _sendMessageToChild(data);
 
@@ -305,7 +304,7 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
             arbitrator.appeal{value: appealCost}(disputeID, arbitratorExtraData);
         }
 
-        if (msg.value.subCap(contribution) > 0) msg.sender.send(msg.value.subCap(contribution)); // Sending extra value back to contributor. It is the user's responsibility to accept ETH.
+        if (msg.value.subCap(contribution) > 0) payable(msg.sender).send(msg.value.subCap(contribution)); // Sending extra value back to contributor. It is the user's responsibility to accept ETH.
         return round.hasPaid[_answer];
     }
 
@@ -401,14 +400,19 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
         Round storage round = arbitration.rounds[arbitration.rounds.length - 1];
         if (round.fundedAnswers.length == 1) finalRuling = round.fundedAnswers[0];
 
+        // Realitio ruling is shifted by 1 compared to Kleros.
+        if (finalRuling != 0) {
+            finalRuling--;
+        } else {
+            finalRuling = REFUSE_TO_ARBITRATE_REALITIO;
+        }
+
         arbitration.answer = finalRuling;
         arbitration.status = Status.Ruled;
 
-        bytes4 methodSelector = IHomeArbitrationProxy(0).receiveArbitrationAnswer.selector;
+        bytes4 methodSelector = IHomeArbitrationProxy.receiveArbitrationAnswer.selector;
 
-        // Realitio ruling is shifted by 1 compared to Kleros.
-        // Note: This will no longer work with solidity 0.8.x and above compiler versions
-        bytes memory data = abi.encodeWithSelector(methodSelector, bytes32(arbitrationID), bytes32(finalRuling - 1));
+        bytes memory data = abi.encodeWithSelector(methodSelector, bytes32(arbitrationID), bytes32(finalRuling));
         _sendMessageToChild(data);
 
         emit Ruling(arbitrator, _disputeID, finalRuling);
