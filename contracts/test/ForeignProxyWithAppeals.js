@@ -2,7 +2,6 @@ const { ethers } = require("hardhat");
 const { solidity } = require("ethereum-waffle");
 const { time } = require("@openzeppelin/test-helpers");
 const { use, expect } = require("chai");
-const getContractAddress = require("../deploy-helpers/getContractAddress");
 
 use(solidity);
 
@@ -692,16 +691,9 @@ describe("Cross-chain arbitration with appeals", () => {
     const ForeignProxy = await ethers.getContractFactory("MockForeignArbitrationProxyWithAppeals", signer);
     const HomeProxy = await ethers.getContractFactory("MockHomeArbitrationProxy", signer);
 
-    const address = await signer.getAddress();
-    const nonce = await signer.getTransactionCount();
-
-    const foreignProxyAddress = getContractAddress(address, nonce);
-    const homeProxyAddress = getContractAddress(address, nonce + 1);
-
     const foreignProxy = await ForeignProxy.deploy(
       ADDRESS_ZERO,
       fxRoot.address,
-      homeProxyAddress,
       arbitrator.address,
       arbitratorExtraData,
       metaEvidence,
@@ -713,9 +705,11 @@ describe("Cross-chain arbitration with appeals", () => {
 
     const homeProxy = await HomeProxy.deploy(
       fxRoot.address, // Here our mock FxRoot directly calls the FxChildTunnel
-      foreignProxyAddress,
       realitio.address
     );
+
+    await foreignProxy.setFxChildTunnel(homeProxy.address);
+    await homeProxy.setFxRootTunnel(foreignProxy.address);
 
     return {
       arbitrator,
