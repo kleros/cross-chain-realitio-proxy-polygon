@@ -2,7 +2,7 @@
 
 /**
  *  @authors: [@hbarcelos, @unknownunknown1, @shalzz]
- *  @reviewers: [@MerlinEgalite*, @jaybuidl*, @unknownunknown1, @fnanni-0]
+ *  @reviewers: [@MerlinEgalite*, @jaybuidl*, @unknownunknown1, @fnanni-0*]
  *  @auditors: []
  *  @bounties: []
  *  @deployments: []
@@ -17,7 +17,6 @@ import {IForeignArbitrationProxy, IHomeArbitrationProxy} from "./ArbitrationProx
 
 /**
  * @title Arbitration proxy for Realitio on Ethereum side (A.K.A. the Foreign Chain).
- * This version of the contract has an appeal support.
  * @dev This contract is meant to be deployed to the Ethereum chains where Kleros is deployed.
  */
 contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy, IDisputeResolver, FxBaseRootTunnel {
@@ -44,7 +43,7 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
         Status status; // Status of the arbitration.
         uint248 deposit; // The deposit paid by the requester at the time of the arbitration.
         uint256 disputeID; // The ID of the dispute in arbitrator contract.
-        uint256 answer; // The answer given by the arbitrator shifted by -1 to match Realitio format.
+        uint256 answer; // The answer given by the arbitrator.
         Round[] rounds; // Tracks each appeal round of a dispute.
     }
 
@@ -395,24 +394,19 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
         require(msg.sender == address(arbitrator), "Only arbitrator allowed");
         require(arbitration.status == Status.Created, "Invalid arbitration status");
         uint256 finalRuling = _ruling;
+        uint256 realitioRuling; // Realitio ruling is shifted by 1 compared to Kleros.
 
         // If one side paid its fees, the ruling is in its favor. Note that if the other side had also paid, an appeal would have been created.
         Round storage round = arbitration.rounds[arbitration.rounds.length - 1];
         if (round.fundedAnswers.length == 1) finalRuling = round.fundedAnswers[0];
 
-        // Realitio ruling is shifted by 1 compared to Kleros.
-        if (finalRuling != 0) {
-            finalRuling--;
-        } else {
-            finalRuling = REFUSE_TO_ARBITRATE_REALITIO;
-        }
-
         arbitration.answer = finalRuling;
         arbitration.status = Status.Ruled;
 
-        bytes4 methodSelector = IHomeArbitrationProxy.receiveArbitrationAnswer.selector;
+        realitioRuling = finalRuling != 0 ? finalRuling - 1 : REFUSE_TO_ARBITRATE_REALITIO;
 
-        bytes memory data = abi.encodeWithSelector(methodSelector, bytes32(arbitrationID), bytes32(finalRuling));
+        bytes4 methodSelector = IHomeArbitrationProxy.receiveArbitrationAnswer.selector;
+        bytes memory data = abi.encodeWithSelector(methodSelector, bytes32(arbitrationID), bytes32(realitioRuling));
         _sendMessageToChild(data);
 
         emit Ruling(arbitrator, _disputeID, finalRuling);
