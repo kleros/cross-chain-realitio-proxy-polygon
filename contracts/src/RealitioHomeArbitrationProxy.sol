@@ -2,7 +2,7 @@
 
 /**
  *  @authors: [@hbarcelos, @shalzz]
- *  @reviewers: [@ferittuncer*, @fnanni-0, @nix1g*, @epiqueras*, @clesaege*, @unknownunknown1]
+ *  @reviewers: [@ferittuncer*, @fnanni-0*, @nix1g*, @epiqueras*, @clesaege*, @unknownunknown1]
  *  @auditors: []
  *  @bounties: []
  *  @deployments: []
@@ -19,7 +19,7 @@ import {IForeignArbitrationProxy, IHomeArbitrationProxy} from "./ArbitrationProx
  * @dev This contract is meant to be deployed to side-chains in which Reality.eth is deployed.
  */
 contract RealitioHomeArbitrationProxy is IHomeArbitrationProxy, FxBaseChildTunnel {
-    /// @dev The address of the Realitio contract (v2.1+ required). TRUSTED.
+    /// @dev The address of the Realitio contract (v3.0 required). TRUSTED.
     RealitioInterface public immutable realitio;
 
     /// @dev Metadata for Realitio interface.
