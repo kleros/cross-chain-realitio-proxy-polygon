@@ -395,24 +395,19 @@ contract RealitioForeignArbitrationProxyWithAppeals is IForeignArbitrationProxy,
         require(msg.sender == address(arbitrator), "Only arbitrator allowed");
         require(arbitration.status == Status.Created, "Invalid arbitration status");
         uint256 finalRuling = _ruling;
+        uint256 realitioRuling; // Realitio ruling is shifted by 1 compared to Kleros.
 
         // If one side paid its fees, the ruling is in its favor. Note that if the other side had also paid, an appeal would have been created.
         Round storage round = arbitration.rounds[arbitration.rounds.length - 1];
         if (round.fundedAnswers.length == 1) finalRuling = round.fundedAnswers[0];
 
-        // Realitio ruling is shifted by 1 compared to Kleros.
-        if (finalRuling != 0) {
-            finalRuling--;
-        } else {
-            finalRuling = REFUSE_TO_ARBITRATE_REALITIO;
-        }
-
         arbitration.answer = finalRuling;
         arbitration.status = Status.Ruled;
 
-        bytes4 methodSelector = IHomeArbitrationProxy.receiveArbitrationAnswer.selector;
+        realitioRuling = finalRuling != 0 ? finalRuling - 1 : REFUSE_TO_ARBITRATE_REALITIO;
 
-        bytes memory data = abi.encodeWithSelector(methodSelector, bytes32(arbitrationID), bytes32(finalRuling));
+        bytes4 methodSelector = IHomeArbitrationProxy.receiveArbitrationAnswer.selector;
+        bytes memory data = abi.encodeWithSelector(methodSelector, bytes32(arbitrationID), bytes32(realitioRuling));
         _sendMessageToChild(data);
 
         emit Ruling(arbitrator, _disputeID, finalRuling);
