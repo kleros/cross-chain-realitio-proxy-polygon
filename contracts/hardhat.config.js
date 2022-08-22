@@ -5,7 +5,7 @@ require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-web3");
 require("hardhat-deploy");
 require("hardhat-deploy-ethers");
-require("./tasks/link-proxies");
+require("@nomiclabs/hardhat-etherscan");
 
 // This is a sample Buidler task. To learn how to create your own go to
 // https://buidler.dev/guides/create-task.html
@@ -71,10 +71,13 @@ module.exports = {
     deployer: {
       default: 0,
     },
-    counterPartyDeployer: {
-      default: 0,
-      xdai: 1,
-      mainnet: 1,
+  },
+  etherscan: {
+    apiKey: {
+      mainnet: process.env.ETHERSCAN_API_KEY,
+      polygon: process.env.MATIC_VERIFY_KEY,
+      goerli: process.env.ETHERSCAN_API_KEY,
+      polygonMumbai: process.env.MATIC_VERIFY_KEY,
     },
   },
 };
