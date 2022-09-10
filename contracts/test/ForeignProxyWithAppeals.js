@@ -26,7 +26,8 @@ const MAX_ANSWER = "115792089237316195423570985008687907853269984665640564039457
 const maxPrevious = 2001;
 
 const metaEvidence = "ipfs/X";
-const termsOfService = "ipfs/Y";
+const metadata = "ipfs/Y";
+const foreignChainId = 5;
 const oneETH = BigNumber.from(BigInt(1e18));
 const ZERO_HASH = hexZeroPad(0, 32);
 const ZERO_ADDRESS = hexZeroPad(0, 20);
@@ -60,7 +61,11 @@ describe("Cross-chain arbitration with appeals", () => {
   it("Should correctly set the initial values", async () => {
     expect(await foreignProxy.arbitrator()).to.equal(arbitrator.address);
     expect(await foreignProxy.arbitratorExtraData()).to.equal(arbitratorExtraData);
-    expect(await foreignProxy.termsOfService()).to.equal(termsOfService);
+    expect(await foreignProxy.fxChildTunnel()).to.equal(homeProxy.address);
+    expect(await homeProxy.metadata()).to.equal(metadata);
+    expect(await homeProxy.foreignChainId()).to.equal(hexZeroPad(foreignChainId, 32));
+    expect(await homeProxy.foreignProxy()).to.equal(foreignProxy.address);
+    expect(await homeProxy.fxRootTunnel()).to.equal(foreignProxy.address);
 
     // 0 - winner, 1 - loser, 2 - loserAppealPeriod.
     const multipliers = await foreignProxy.getMultipliers();
@@ -697,7 +702,6 @@ describe("Cross-chain arbitration with appeals", () => {
       arbitrator.address,
       arbitratorExtraData,
       metaEvidence,
-      termsOfService,
       winnerMultiplier,
       loserMultiplier,
       loserAppealPeriodMultiplier
@@ -705,7 +709,9 @@ describe("Cross-chain arbitration with appeals", () => {
 
     const homeProxy = await HomeProxy.deploy(
       fxRoot.address, // Here our mock FxRoot directly calls the FxChildTunnel
-      realitio.address
+      realitio.address,
+      foreignChainId,
+      metadata
     );
 
     await foreignProxy.setFxChildTunnel(homeProxy.address);
