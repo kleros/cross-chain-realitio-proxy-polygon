@@ -10,7 +10,12 @@ import {MockForeignArbitrationProxyWithAppeals} from "./MockForeignArbitratorPro
  * @dev This contract is meant to be deployed on the side of Realitio.
  */
 contract MockHomeArbitrationProxy is RealitioHomeArbitrationProxy {
-    constructor(address _fxChild, RealitioInterface _realitio) RealitioHomeArbitrationProxy(_fxChild, _realitio) {}
+    constructor(
+        address _fxChild,
+        RealitioInterface _realitio,
+        uint256 _foreignChainId,
+        string memory _metadata
+    ) RealitioHomeArbitrationProxy(_fxChild, _realitio, _foreignChainId, _metadata) {}
 
     // Overridden to directly call the foreignProxy under test
     // instead of emitting an event
