@@ -14,7 +14,6 @@ contract MockForeignArbitrationProxyWithAppeals is RealitioForeignArbitrationPro
         IArbitrator _arbitrator,
         bytes memory _arbitratorExtraData,
         string memory _metaEvidence,
-        string memory _termsOfService,
         uint256 _winnerMultiplier,
         uint256 _loserMultiplier,
         uint256 _loserAppealPeriodMultiplier
@@ -25,7 +24,6 @@ contract MockForeignArbitrationProxyWithAppeals is RealitioForeignArbitrationPro
             _arbitrator,
             _arbitratorExtraData,
             _metaEvidence,
-            _termsOfService,
             _winnerMultiplier,
             _loserMultiplier,
             _loserAppealPeriodMultiplier

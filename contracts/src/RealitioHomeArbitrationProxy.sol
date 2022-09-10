@@ -22,8 +22,11 @@ contract RealitioHomeArbitrationProxy is IHomeArbitrationProxy, FxBaseChildTunne
     /// @dev The address of the Realitio contract (v3.0 required). TRUSTED.
     RealitioInterface public immutable realitio;
 
+    /// @dev ID of the foreign chain, required for Realitio.
+    bytes32 public immutable foreignChainId;
+
     /// @dev Metadata for Realitio interface.
-    string public constant metadata = '{"foreignProxy":true}';
+    string public override metadata;
 
     enum Status {
         None,
@@ -62,9 +65,18 @@ contract RealitioHomeArbitrationProxy is IHomeArbitrationProxy, FxBaseChildTunne
      * @notice Creates an arbitration proxy on the home chain.
      * @param _fxChild Address of the FxChild contract of the Polygon bridge
      * @param _realitio Realitio contract address.
+     * @param _foreignChainId The ID of foreign chain (Goerli/Mainnet).
+     * @param _metadata Metadata for Realitio
      */
-    constructor(address _fxChild, RealitioInterface _realitio) FxBaseChildTunnel(_fxChild) {
+    constructor(
+        address _fxChild,
+        RealitioInterface _realitio,
+        uint256 _foreignChainId,
+        string memory _metadata
+    ) FxBaseChildTunnel(_fxChild) {
         realitio = _realitio;
+        foreignChainId = bytes32(_foreignChainId);
+        metadata = _metadata;
     }
 
     /**
@@ -217,6 +229,13 @@ contract RealitioHomeArbitrationProxy is IHomeArbitrationProxy, FxBaseChildTunne
         request.status = Status.Finished;
 
         emit ArbitrationFinished(_questionID);
+    }
+
+    /**
+     * @notice Realitio interface requires home proxy to return foreign proxy.
+     */
+    function foreignProxy() external view returns (address) {
+        return fxRootTunnel;
     }
 
     function _processMessageFromRoot(

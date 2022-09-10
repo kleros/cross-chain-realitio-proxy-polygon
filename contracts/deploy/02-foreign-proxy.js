@@ -7,7 +7,6 @@ const paramsByChainId = {
     arbitratorExtraData:
       "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
     metaEvidence: "/ipfs/Qmcg1JYNqtuVJUbVk79DuFwWaZwzduiwndoURJa37kZZ2F/realitio.json",
-    termsOfService: "/ipfs/QmaUr6hnSVxYD899xdcn2GUVtXVjXoSXKZbce3zFtGWw4H/Question_Resolution_Policy.pdf",
     winnerMultiplier: 3000,
     loserMultiplier: 7000,
     loserAppealPeriodMultiplier: 5000,
@@ -19,7 +18,6 @@ const paramsByChainId = {
     arbitratorExtraData:
       "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001f4",
     metaEvidence: "/ipfs/Qmc6bWTzPMFeRx9VWHwnDpDXfimwNsvnEgJo3gymg37rRd/realitio.json",
-    termsOfService: "/ipfs/QmaUr6hnSVxYD899xdcn2GUVtXVjXoSXKZbce3zFtGWw4H/Question_Resolution_Policy.pdf",
     winnerMultiplier: 3000,
     loserMultiplier: 7000,
     loserAppealPeriodMultiplier: 5000,
@@ -39,7 +37,6 @@ async function deployForeignProxy({ deployments, getNamedAccounts, getChainId })
     arbitrator,
     arbitratorExtraData,
     metaEvidence,
-    termsOfService,
     winnerMultiplier,
     loserMultiplier,
     loserAppealPeriodMultiplier,
@@ -53,7 +50,6 @@ async function deployForeignProxy({ deployments, getNamedAccounts, getChainId })
       arbitrator,
       arbitratorExtraData,
       metaEvidence,
-      termsOfService,
       winnerMultiplier,
       loserMultiplier,
       loserAppealPeriodMultiplier,
