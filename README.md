@@ -1,8 +1,10 @@
+### ⚠️ The content has been moved to [kleros/cross-chain-realitio-proxy](https://github.com/kleros/cross-chain-realitio-proxy)
+
 # Cross-Chain Realitio Proxy
 
 Enables cross-chain arbitration for Realition (Reality.eth) on Polygon using Kleros as arbitrator.
 
-##
+## Intro
 
 We use Polygon Fx-Portal mechanism for cross chain communication.
 You can find out more about how Fx-Portal works from here:
